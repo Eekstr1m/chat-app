@@ -33,10 +33,10 @@ app.use(cors(corsOptions));
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, "client", "out")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "client", "out", "index.html"));
 });
 
 app.get("/api/hello", (req, res) => {
