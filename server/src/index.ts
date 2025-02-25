@@ -23,7 +23,9 @@ const __dirname = path.resolve();
 
 // Cors
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN,
+  // origin: process.env.CORS_ORIGIN,
+  // allow all origins
+  origin: "*",
   credentials: true,
 };
 app.use(cors(corsOptions));
