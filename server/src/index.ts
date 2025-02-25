@@ -40,7 +40,7 @@ app.get("*", (req, res) => {
 });
 
 app.get("/api/hello", (req, res) => {
-  res.send("Hello World");
+  return res.status(200).json({ message: "Hello World" });
 });
 
 // Routes middlewares
