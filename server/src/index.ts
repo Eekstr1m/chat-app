@@ -39,6 +39,10 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 
+app.get("/api/hello", (req, res) => {
+  res.send("Hello World");
+});
+
 // Routes middlewares
 app.use("/api/auth", getAuthRoutes()); // Auth
 app.use("/api/messages", getMessageRoutes()); // Messages
