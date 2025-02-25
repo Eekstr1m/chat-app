@@ -6,7 +6,9 @@ export const app = express();
 export const server = http.createServer(app);
 export const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN,
+    // origin: process.env.CORS_ORIGIN,
+    // allow all origins
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST"],
   },
