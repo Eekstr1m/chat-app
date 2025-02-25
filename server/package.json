@@ -4,7 +4,7 @@
   "scripts": {
     "watch": "tsc -w",
     "dev": "nodemon ./dist/index.js",
-    "build": "npm install && tsc && mkdir -p public && cp ./index.html public/",
+    "build": "npm install && tsc",
     "start": "node ./dist/index.js"
   },
   "type": "module",
