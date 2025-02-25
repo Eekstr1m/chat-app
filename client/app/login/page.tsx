@@ -1,9 +1,9 @@
 "use client";
-import AuthForm from "@/components/AuthForm/AuthForm";
-import { useAuthContext } from "@/context/AuthContext";
+import AuthForm from "../../components/AuthForm/AuthForm";
+import { useAuthContext } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { handleAuthRedirect } from "@/utils/auth";
+import { handleAuthRedirect } from "../../utils/auth";
 import { GridItem, Center, Spinner } from "@chakra-ui/react";
 
 export default function Page() {
