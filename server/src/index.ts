@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
 
 // DB
 import connectToMongo from "./db/connectToMongo.js";
@@ -18,6 +19,7 @@ import { getUsersRoutes } from "./routes/users.routes.js";
 dotenv.config();
 // const app = express();
 const PORT = process.env.PORT || 5001;
+const __dirname = path.resolve();
 
 // Cors
 const corsOptions = {
@@ -29,6 +31,11 @@ app.use(cors(corsOptions));
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "client", "dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+});
 
 // Routes middlewares
 app.use("/api/auth", getAuthRoutes()); // Auth
