@@ -1,14 +1,14 @@
 "use client";
-import { useGetMessages } from "@/hooks/useGetMessages";
+import { useGetMessages } from "../../../hooks/useGetMessages";
 import { Center, Flex, Grid, Text } from "@chakra-ui/react";
 import { useEffect, useRef, forwardRef } from "react";
-import { extractTime } from "@/utils/extractTime";
-import { useAuthContext } from "@/context/AuthContext";
-import { useListenMessages } from "@/hooks/useListenMessages";
-import { useUpdateMessage } from "@/hooks/useUpdateMessage";
+import { extractTime } from "../../../utils/extractTime";
+import { useAuthContext } from "../../../context/AuthContext";
+import { useListenMessages } from "../../../hooks/useListenMessages";
+import { useUpdateMessage } from "../../../hooks/useUpdateMessage";
 import React from "react";
-import { CustomSpinnerWithText } from "@/components/Spinner/Spinner";
-import { useMessageScroll } from "@/hooks/useMessageScroll";
+import { CustomSpinnerWithText } from "../../Spinner/Spinner";
+import { useMessageScroll } from "../../../hooks/useMessageScroll";
 
 export default function MessagesBlock({
   messageReceiver,

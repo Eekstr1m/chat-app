@@ -1,5 +1,5 @@
-import { MessageI, UnreadCountI } from "@/interfaces/MessagesInterfaces";
-import { api } from "@/api/api";
+import { MessageI, UnreadCountI } from "../interfaces/MessagesInterfaces";
+import { api } from "../api/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useGetMessages = (receiverId: string) => {

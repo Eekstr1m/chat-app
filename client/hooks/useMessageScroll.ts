@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useMemo } from "react";
-import { MessageI } from "@/interfaces/MessagesInterfaces";
-import { useAuthContext } from "@/context/AuthContext";
+import { MessageI } from "../interfaces/MessagesInterfaces";
+import { useAuthContext } from "../context/AuthContext";
 
 interface UseMessageScrollProps {
   messages: MessageI[] | undefined;

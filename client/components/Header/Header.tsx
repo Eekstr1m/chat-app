@@ -1,7 +1,7 @@
 "use client";
 import { Box, Flex, Heading, Mark, Text } from "@chakra-ui/react";
 import LogOut from "./LogOut";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 
 export default function Header() {
   const { authUser } = useAuthContext();

@@ -1,6 +1,6 @@
 "use client";
-import { api } from "@/api/api";
-import { UserI } from "@/interfaces/UsersInterfaces";
+import { api } from "../api/api";
+import { UserI } from "../interfaces/UsersInterfaces";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetConversations = () => {

@@ -1,5 +1,5 @@
-import Messages from "@/components/Messages/Messages";
-import SideBar from "@/components/SideBar/SideBar";
+import Messages from "../../../components/Messages/Messages";
+import SideBar from "../../../components/SideBar/SideBar";
 import { GridItem } from "@chakra-ui/react";
 
 export default async function Page({

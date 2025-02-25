@@ -9,13 +9,13 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { Skeleton, SkeletonCircle } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonCircle } from "../../components/ui/skeleton";
 import React from "react";
-import { useGetConversations } from "@/hooks/useGetConversations";
-import { UserI } from "@/interfaces/UsersInterfaces";
+import { useGetConversations } from "../../hooks/useGetConversations";
+import { UserI } from "../../interfaces/UsersInterfaces";
 import Link from "next/link";
-import { useSocketContext } from "@/context/SocketContext";
-import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useSocketContext } from "../../context/SocketContext";
+import { useUnreadMessages } from "../../hooks/useUnreadMessages";
 
 export default function ConversationsList({
   messageReceiver,

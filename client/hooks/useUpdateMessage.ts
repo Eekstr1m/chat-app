@@ -1,6 +1,5 @@
-import { api } from "@/api/api";
+import { api } from "../api/api";
 import { useQueryClient } from "@tanstack/react-query";
-
 import { useMutation } from "@tanstack/react-query";
 
 export const useUpdateMessage = () => {

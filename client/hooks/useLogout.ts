@@ -1,9 +1,9 @@
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/context/AuthContext";
-import { api } from "@/api/api";
+import { useAuthContext } from "../context/AuthContext";
+import { api } from "../api/api";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "../components/ui/toaster";
 
 export const useLogout = () => {
   const router = useRouter();

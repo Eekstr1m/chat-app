@@ -1,4 +1,4 @@
-import { AuthUserI } from "@/interfaces/AuthInterfaces";
+import { AuthUserI } from "../interfaces/AuthInterfaces";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const handleAuthRedirect = (

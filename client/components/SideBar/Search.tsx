@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Input } from "@chakra-ui/react";
-import { InputGroup } from "@/components/ui/input-group";
+import { InputGroup } from "../../components/ui/input-group";
 import { MdSearch } from "react-icons/md";
 import { useForm } from "react-hook-form";
 export default function Search() {

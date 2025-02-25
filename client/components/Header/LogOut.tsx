@@ -1,4 +1,4 @@
-import { useLogout } from "@/hooks/useLogout";
+import { useLogout } from "../../hooks/useLogout";
 import { Spinner } from "@chakra-ui/react";
 import { CiLogout } from "react-icons/ci";
 

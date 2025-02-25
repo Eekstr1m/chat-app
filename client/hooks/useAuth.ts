@@ -1,7 +1,7 @@
 "use client";
 
-import { api } from "@/api/api";
-import { toaster } from "@/components/ui/toaster";
+import { api } from "../api/api";
+import { toaster } from "../components/ui/toaster";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -9,8 +9,8 @@ import {
   AuthUserI,
   LoginDataI,
   SignupDataI,
-} from "@/interfaces/AuthInterfaces";
-import { useAuthContext } from "@/context/AuthContext";
+} from "../interfaces/AuthInterfaces";
+import { useAuthContext } from "../context/AuthContext";
 export const useAuth = () => {
   const router = useRouter();
   const { setAuthUser } = useAuthContext();

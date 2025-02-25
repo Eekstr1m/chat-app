@@ -1,8 +1,8 @@
-import { api } from "@/api/api";
-import { toaster } from "@/components/ui/toaster";
+import { api } from "../api/api";
+import { toaster } from "../components/ui/toaster";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { MessageI } from "@/interfaces/MessagesInterfaces";
+import { MessageI } from "../interfaces/MessagesInterfaces";
 
 export const useSendMessage = (receiverId: string) => {
   const queryClient = useQueryClient();

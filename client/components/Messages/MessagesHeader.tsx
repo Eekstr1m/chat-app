@@ -1,7 +1,7 @@
-import { useGetUserById } from "@/hooks/useGetUserById";
+import { useGetUserById } from "../../hooks/useGetUserById";
 import { Avatar, Box, Flex, HStack, Stack, Text } from "@chakra-ui/react";
-import { Skeleton, SkeletonCircle } from "@/components/ui/skeleton";
-import { useSocketContext } from "@/context/SocketContext";
+import { Skeleton, SkeletonCircle } from "../../components/ui/skeleton";
+import { useSocketContext } from "../../context/SocketContext";
 
 export default function MessagesHeader({
   messageReceiver,

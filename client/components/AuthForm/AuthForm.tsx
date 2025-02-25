@@ -1,6 +1,6 @@
 "use client";
-import { Field } from "@/components/ui/field";
-import { PasswordInput } from "@/components/ui/password-input";
+import { Field } from "../../components/ui/field";
+import { PasswordInput } from "../../components/ui/password-input";
 import {
   Box,
   Button,
@@ -19,8 +19,8 @@ import {
   useForm,
   UseFormRegister,
 } from "react-hook-form";
-import { useAuth } from "@/hooks/useAuth";
-import { FormInputsI } from "@/interfaces/AuthInterfaces";
+import { useAuth } from "../../hooks/useAuth";
+import { FormInputsI } from "../../interfaces/AuthInterfaces";
 
 export default function AuthForm({
   type,

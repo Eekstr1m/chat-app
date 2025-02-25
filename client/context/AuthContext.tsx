@@ -1,5 +1,5 @@
 "use client";
-import { AuthUserI } from "@/interfaces/AuthInterfaces";
+import { AuthUserI } from "../interfaces/AuthInterfaces";
 import { createContext, useContext, useState, useEffect } from "react";
 
 // Auth Context

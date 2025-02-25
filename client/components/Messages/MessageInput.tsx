@@ -3,9 +3,9 @@ import { Input, Spinner } from "@chakra-ui/react";
 import { InputGroup } from "../ui/input-group";
 import { IoMdSend } from "react-icons/io";
 import { useForm } from "react-hook-form";
-import { useSendMessage } from "@/hooks/useSendMessage";
+import { useSendMessage } from "../../hooks/useSendMessage";
 import { useEffect } from "react";
-import { useGetMessages } from "@/hooks/useGetMessages";
+import { useGetMessages } from "../../hooks/useGetMessages";
 
 export default function MessageInput({
   messageReceiver,

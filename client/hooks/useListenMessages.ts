@@ -1,8 +1,8 @@
-import { useSocketContext } from "@/context/SocketContext";
-import { MessageI, UnreadCountI } from "@/interfaces/MessagesInterfaces";
+import { useSocketContext } from "../context/SocketContext";
+import { MessageI, UnreadCountI } from "../interfaces/MessagesInterfaces";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 
 export const useListenMessages = (receiverId: string) => {
   const { socket } = useSocketContext();

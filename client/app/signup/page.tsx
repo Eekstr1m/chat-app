@@ -1,7 +1,7 @@
 "use client";
-import AuthForm from "@/components/AuthForm/AuthForm";
-import { useAuthContext } from "@/context/AuthContext";
-import { handleAuthRedirect } from "@/utils/auth";
+import AuthForm from "../../components/AuthForm/AuthForm";
+import { useAuthContext } from "../../context/AuthContext";
+import { handleAuthRedirect } from "../../utils/auth";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Center, Spinner } from "@chakra-ui/react";
