@@ -5,6 +5,13 @@ export interface MessageI {
   message: string;
   contentType: string;
   isRead: boolean;
+  repliedTo?: {
+    _id: string;
+    message: string;
+    contentType: string;
+    senderId: string;
+    createdAt: Date;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 }

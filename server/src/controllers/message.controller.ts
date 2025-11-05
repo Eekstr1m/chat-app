@@ -34,7 +34,7 @@ export const sendMessage = async (
   res: Response<MessageResponseI | { error: string }>
 ) => {
   try {
-    const { message, contentType } = req.body;
+    const { message, contentType, repliedTo } = req.body;
     const { id } = req.params;
     if (!req.user) {
       return res.status(400).json({ error: "Something went wrong" });
@@ -63,6 +63,7 @@ export const sendMessage = async (
       receiverId,
       message,
       contentType,
+      repliedTo: repliedTo || null,
     });
     if (newMessage) {
       conversation.messages.push(newMessage._id);
@@ -70,10 +71,20 @@ export const sendMessage = async (
 
     await Promise.all([conversation.save(), newMessage.save()]);
 
+    // populate repliedTo for emission/response
+    const populatedMessage = await Message.findById(newMessage._id).populate({
+      path: "repliedTo",
+      select: "message contentType senderId createdAt",
+    });
+
     // Socket io to send the message to the receiver
     const receiverSocketId = getReceiverSocketId(receiverId.toString());
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+      // io.to(receiverSocketId).emit("newMessage", newMessage);
+      io.to(receiverSocketId).emit(
+        "newMessage",
+        populatedMessage ?? newMessage
+      );
 
       // Socket io to send emit to receiver for first message in chat
       if (conversation.messages.length === 1) {
@@ -87,7 +98,8 @@ export const sendMessage = async (
       }
     }
 
-    res.status(201).json(newMessage);
+    // res.status(201).json(newMessage);
+    res.status(201).json(populatedMessage ?? newMessage);
   } catch (error) {
     console.error("Error send message controller", error);
     res.status(500).json({ error: "Internal server error" });
@@ -111,9 +123,20 @@ export const getMessages = async (req: GetMessagesRequestI, res: Response) => {
       return res.status(400).json({ error: "User not found" });
 
     // Get conversation messages
+    // const conversation = await Conversation.findOne({
+    //   participants: { $all: [senderId, receiverId] },
+    // }).populate("messages");
+
+    // Get conversation messages and populate repliedTo inside messages
     const conversation = await Conversation.findOne({
       participants: { $all: [senderId, receiverId] },
-    }).populate("messages");
+    }).populate({
+      path: "messages",
+      populate: {
+        path: "repliedTo",
+        select: "message contentType senderId createdAt",
+      },
+    });
 
     // If conversation messages empty return empty array
     if (!conversation) return res.status(200).json([]);

@@ -11,6 +11,7 @@ export default function MessageContextMenu({
   messageId,
   messageText,
   actor,
+  onReply,
 }: {
   x: number;
   y: number;
@@ -18,6 +19,7 @@ export default function MessageContextMenu({
   messageId: string;
   messageText: string | null;
   actor: "sender" | "receiver";
+  onReply?: (payload: { id: string; preview: string | null }) => void;
 }) {
   const contextRef = useRef<HTMLElement>(null);
   useOnClickOutside(contextRef, handleMenuClose);
@@ -28,12 +30,14 @@ export default function MessageContextMenu({
     handleMenuClose();
     console.log("Edit message: " + messageId);
   };
+
   const handleDelete = () => {
     deleteMessage();
     handleMenuClose();
     // Implement delete logic here
     console.log("Delete message: " + messageId);
   };
+
   const handleCopy = () => {
     handleMenuClose();
     if (messageText) {
@@ -43,6 +47,11 @@ export default function MessageContextMenu({
         type: "info",
       });
     }
+  };
+
+  const handleReply = () => {
+    handleMenuClose();
+    onReply?.({ id: messageId, preview: messageText ?? null });
   };
 
   return (
@@ -60,6 +69,8 @@ export default function MessageContextMenu({
         onMouseLeave={handleMenuClose}
       >
         <Flex direction="column" gap={2}>
+          {/* Reply available for all messages */}
+          <TextMenuItem onClick={handleReply}>Reply</TextMenuItem>
           {actor === "sender" && messageText && (
             <TextMenuItem onClick={handleEdit}>Edit</TextMenuItem>
           )}

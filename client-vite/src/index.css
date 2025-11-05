@@ -51,6 +51,23 @@ body {
   -webkit-backdrop-filter: blur(5.4px);
 }
 
+/* Highlighted message */
+.highlighted-message {
+  background: rgba(156, 58, 81, 0.51);
+  animation: highlightFade 1.5s forwards;
+  pointer-events: none;
+}
+@keyframes highlightFade {
+  from {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .wrapper {
   height: 100vh;
   /* background: #000; */

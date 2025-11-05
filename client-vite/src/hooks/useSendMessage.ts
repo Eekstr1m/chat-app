@@ -12,13 +12,15 @@ export const useSendMessage = (receiverId: string) => {
     mutationFn: async ({
       message,
       contentType,
+      repliedTo,
     }: {
       message: string;
       contentType: string;
+      repliedTo?: string;
     }) => {
       const response = await api.post<MessageI>(
         `/messages/send/${receiverId}`,
-        { message, contentType }
+        { message, contentType, repliedTo }
       );
       return response.data;
     },

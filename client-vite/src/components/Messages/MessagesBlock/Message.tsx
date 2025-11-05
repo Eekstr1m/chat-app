@@ -19,10 +19,33 @@ type MessageProps = {
   time: Date;
   isRead: boolean;
   messageId: string;
+  // populated replied message (optional)
+  repliedTo?: {
+    _id: string;
+    message: string;
+    contentType: string;
+    senderId: string;
+    createdAt: Date;
+  } | null;
+  onReply?: (payload: { id: string; preview: string | null }) => void;
+  onReplyClick?: (repliedToMessageId: string) => void;
 };
 
 export const Message = forwardRef<HTMLDivElement, MessageProps>(
-  ({ text, contentType, actor, time, messageId, isRead }, ref) => {
+  (
+    {
+      text,
+      contentType,
+      actor,
+      time,
+      messageId,
+      isRead,
+      repliedTo,
+      onReply,
+      onReplyClick,
+    },
+    ref
+  ) => {
     const { updateMessage } = useUpdateMessage();
     const messageRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +88,13 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [text, contentType]);
 
+    // Helper to scroll to replied message
+    const handleJumpToOriginal = () => {
+      if (onReplyClick && repliedTo) {
+        onReplyClick(repliedTo._id);
+      }
+    };
+
     // Custom context menu hook
     const {
       menu,
@@ -95,10 +125,32 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
       >
         <Grid
           ref={messageRef}
+          id={`msg-${messageId}`}
           templateColumns={"auto auto"}
           alignItems={"end"}
           gap={2}
         >
+          {/* Replied message preview */}
+          {repliedTo && (
+            <Box
+              bg={"gray.700"}
+              px={3}
+              py={2}
+              borderRadius="md"
+              maxW="full"
+              mb={2}
+              cursor="pointer"
+              onClick={handleJumpToOriginal}
+              title="Jump to original message"
+            >
+              <Text fontSize="sm" color="gray.300" truncate>
+                {repliedTo.contentType?.startsWith("audio/")
+                  ? "Audio message"
+                  : repliedTo.message ?? "Message"}
+              </Text>
+            </Box>
+          )}
+
           {contentType === "text" || contentType === undefined ? (
             <Text>{text}</Text>
           ) : (
@@ -145,6 +197,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                   : null
               }
               actor={actor}
+              onReply={onReply}
             />
           )}
         </Grid>

@@ -1,4 +1,4 @@
-import { Flex, Input, Spinner } from "@chakra-ui/react";
+import { Box, Flex, IconButton, Input, Spinner, Text } from "@chakra-ui/react";
 import { InputGroup } from "../../ui/input-group";
 import { IoMdSend } from "react-icons/io";
 import { useForm } from "react-hook-form";
@@ -9,11 +9,18 @@ import { useFollowConversation } from "../../../hooks/useFollowConversation";
 import { isDesktop } from "react-device-detect";
 import EmojiButton from "./EmojiButton";
 import VoiceButton from "./VoiceButton";
+import { IoCloseCircleOutline } from "react-icons/io5";
 
 export default function MessageInput({
   messageReceiver,
+  replyTo,
+  onCancelReply,
+  onSent,
 }: {
   messageReceiver: string;
+  replyTo?: { id: string; preview: string | null } | null;
+  onCancelReply?: () => void;
+  onSent?: () => void;
 }) {
   // Hook for handling sending messages
   const { sendMessage, isLoading, isSuccess } = useSendMessage(messageReceiver);
@@ -37,7 +44,12 @@ export default function MessageInput({
   const onSubmit = ({ message }: { message: string }) => {
     // Send only if message exist
     if (message) {
-      sendMessage({ message, contentType: "text" });
+      // include repliedTo id when sending a reply
+      sendMessage({
+        message,
+        contentType: "text",
+        repliedTo: replyTo?.id,
+      });
       reset();
       setFocus("message");
     }
@@ -56,6 +68,15 @@ export default function MessageInput({
       setFocus("message");
     }
   }, [setFocus, isLoading, isMessagesLoading, messagesList]);
+
+  // Clear reply state after successful send
+  useEffect(() => {
+    if (isSuccess && replyTo) {
+      onSent?.();
+    }
+    // only run when isSuccess changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess]);
 
   // Create input ref
   const { ref: registerRef, ...rest } = register("message");
@@ -77,6 +98,35 @@ export default function MessageInput({
       position={"relative"}
       onSubmit={handleSubmit(onSubmit)}
     >
+      {/* Reply preview box */}
+      {replyTo && (
+        <Box
+          position="absolute"
+          top="-3.5rem"
+          left={4}
+          right={4}
+          bg="gray.700"
+          borderRadius="md"
+          p={2}
+          display="flex"
+          alignItems="center"
+          gap={2}
+          zIndex={2}
+        >
+          <Text flex={1} fontSize="sm" truncate={true} color="gray.200">
+            {replyTo.preview ?? "Message"}
+          </Text>
+          <IconButton
+            size="sm"
+            aria-label="Cancel reply"
+            onClick={onCancelReply}
+            variant="ghost"
+          >
+            <IoCloseCircleOutline />
+          </IconButton>
+        </Box>
+      )}
+
       {!isRecordingInProgress && (
         <InputGroup
           w={"100%"}

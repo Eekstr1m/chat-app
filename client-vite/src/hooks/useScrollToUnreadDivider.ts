@@ -8,7 +8,7 @@ interface UseMessageScrollProps {
   lastMessageRef: RefObject<HTMLDivElement | null>;
 }
 
-export const useMessageScroll = ({
+export const useScrollToUnreadDivider = ({
   messages,
   firstUnreadMessageRef,
   lastMessageRef,
