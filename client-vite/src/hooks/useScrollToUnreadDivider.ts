@@ -4,13 +4,14 @@ import { useAuthContext } from "../context/AuthContext";
 
 interface UseMessageScrollProps {
   messages: MessageI[] | undefined;
-  firstUnreadMessageRef: RefObject<HTMLDivElement | null>;
+  // firstUnreadMessageRef: RefObject<HTMLDivElement | null>;
+  firstRender: RefObject<boolean>;
   lastMessageRef: RefObject<HTMLDivElement | null>;
 }
 
 export const useScrollToUnreadDivider = ({
   messages,
-  firstUnreadMessageRef,
+  firstRender,
   lastMessageRef,
 }: UseMessageScrollProps) => {
   const { authUser } = useAuthContext();
@@ -25,25 +26,43 @@ export const useScrollToUnreadDivider = ({
   }, [messages, authUser]);
 
   // Scroll to the first unread message
+  // useEffect(() => {
+  //   if (!messages?.length) return;
+
+  //   const scrollTimeout = setTimeout(() => {
+  //     if (firstUnreadIndex !== -1 && firstUnreadMessageRef.current) {
+  //       firstUnreadMessageRef.current.scrollIntoView({
+  //         behavior: "smooth",
+  //         block: "end",
+  //       });
+  //     }
+  //   }, 100);
+
+  //   // Clear the timeout when the component unmounts
+  //   return () => clearTimeout(scrollTimeout);
+  // }, [messages, firstUnreadMessageRef, lastMessageRef, firstUnreadIndex]);
+
+  // --- 3. Auto-scroll when user opens chat OR to first unread message ---
   useEffect(() => {
     if (!messages?.length) return;
 
-    const scrollTimeout = setTimeout(() => {
-      if (firstUnreadIndex !== -1 && firstUnreadMessageRef.current) {
-        firstUnreadMessageRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
-      } else if (lastMessageRef.current) {
-        lastMessageRef.current.scrollIntoView({
-          behavior: "auto",
-        });
-      }
-    }, 100);
+    if (firstRender.current) {
+      firstRender.current = false;
 
-    // Clear the timeout when the component unmounts
-    return () => clearTimeout(scrollTimeout);
-  }, [messages, firstUnreadMessageRef, lastMessageRef, firstUnreadIndex]);
+      // Scroll to first unread if exists
+      if (firstUnreadIndex !== -1) {
+        const targetId = messages[firstUnreadIndex]._id;
+        const targetEl = document.getElementById(`msg-${targetId}`);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+      }
+
+      // fallback → scroll to bottom
+      lastMessageRef.current?.scrollIntoView({ behavior: "auto" });
+    }
+  }, [messages, firstUnreadIndex, lastMessageRef, firstRender]);
 
   return {
     firstUnreadIndex,

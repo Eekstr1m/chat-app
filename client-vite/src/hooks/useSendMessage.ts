@@ -2,7 +2,10 @@ import { api } from "../api/api";
 import { toaster } from "../components/ui/toaster";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { MessageI } from "../interfaces/MessagesInterfaces";
+import {
+  MessageI,
+  PaginatedMessagesResponse,
+} from "../interfaces/MessagesInterfaces";
 
 export const useSendMessage = (receiverId: string) => {
   const queryClient = useQueryClient();
@@ -25,12 +28,41 @@ export const useSendMessage = (receiverId: string) => {
       return response.data;
     },
     onSuccess: (newMessage) => {
-      // Update messages cache
-      queryClient.setQueryData<MessageI[]>(
+      console.log("🚀 ~ useSendMessage ~ newMessage:", newMessage);
+      // Update messages cache.
+      // The `messages` query stores a paginated response { messages, total, hasMore, skip, limit }.
+      // Older bug may have left an array in the cache, so handle both shapes.
+      queryClient.setQueryData(
         ["messages", receiverId],
-        (oldData) => {
-          if (!oldData) return [newMessage];
-          return [...oldData, newMessage];
+        (oldData: PaginatedMessagesResponse) => {
+          // If there's no cache yet, create a minimal paginated payload
+          if (!oldData) {
+            return {
+              messages: [newMessage],
+              total: 1,
+              hasMore: false,
+              skip: 0,
+              limit: 50,
+            };
+          }
+
+          // If cache is an array (previous buggy state), convert it into the paginated shape
+          if (Array.isArray(oldData)) {
+            return {
+              messages: [...oldData, newMessage],
+              total: oldData.length + 1,
+              hasMore: false,
+              skip: 0,
+              limit: 50,
+            };
+          }
+
+          // Normal case: oldData is the paginated response
+          return {
+            ...oldData,
+            messages: [...(oldData.messages || []), newMessage],
+            total: (oldData.total ?? oldData.messages?.length ?? 0) + 1,
+          };
         }
       );
     },

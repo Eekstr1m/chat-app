@@ -19,3 +19,11 @@ export interface MessageI {
 export interface UnreadCountI {
   [key: string]: number;
 }
+
+export interface PaginatedMessagesResponse {
+  messages: MessageI[];
+  total: number;
+  hasMore: boolean;
+  skip: number;
+  limit: number;
+}

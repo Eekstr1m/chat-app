@@ -10,6 +10,7 @@ export default function MessageContextMenu({
   handleMenuClose,
   messageId,
   messageText,
+  messageType,
   actor,
   onReply,
 }: {
@@ -18,8 +19,13 @@ export default function MessageContextMenu({
   handleMenuClose: () => void;
   messageId: string;
   messageText: string | null;
+  messageType: string;
   actor: "sender" | "receiver";
-  onReply?: (payload: { id: string; preview: string | null }) => void;
+  onReply?: (payload: {
+    id: string;
+    preview: string | null;
+    type: string;
+  }) => void;
 }) {
   const contextRef = useRef<HTMLElement>(null);
   useOnClickOutside(contextRef, handleMenuClose);
@@ -51,7 +57,11 @@ export default function MessageContextMenu({
 
   const handleReply = () => {
     handleMenuClose();
-    onReply?.({ id: messageId, preview: messageText ?? null });
+    onReply?.({
+      id: messageId,
+      preview: messageText ?? null,
+      type: messageType,
+    });
   };
 
   return (

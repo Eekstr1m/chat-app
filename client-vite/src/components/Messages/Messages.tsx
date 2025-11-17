@@ -9,6 +9,7 @@ function Messages({ messageReceiver }: { messageReceiver: string }) {
   const [replyTo, setReplyTo] = useState<{
     id: string;
     preview: string | null;
+    type: string;
   } | null>(null);
 
   return (

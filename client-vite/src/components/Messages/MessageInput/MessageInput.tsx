@@ -1,4 +1,4 @@
-import { Box, Flex, IconButton, Input, Spinner, Text } from "@chakra-ui/react";
+import { Box, Flex, Input, Spinner, Text } from "@chakra-ui/react";
 import { InputGroup } from "../../ui/input-group";
 import { IoMdSend } from "react-icons/io";
 import { useForm } from "react-hook-form";
@@ -9,7 +9,7 @@ import { useFollowConversation } from "../../../hooks/useFollowConversation";
 import { isDesktop } from "react-device-detect";
 import EmojiButton from "./EmojiButton";
 import VoiceButton from "./VoiceButton";
-import { IoCloseCircleOutline } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
 
 export default function MessageInput({
   messageReceiver,
@@ -18,7 +18,7 @@ export default function MessageInput({
   onSent,
 }: {
   messageReceiver: string;
-  replyTo?: { id: string; preview: string | null } | null;
+  replyTo?: { id: string; preview: string | null; type: string } | null;
   onCancelReply?: () => void;
   onSent?: () => void;
 }) {
@@ -37,7 +37,9 @@ export default function MessageInput({
   } = useForm<{ message: string }>();
 
   // Get messages
-  const { data: messagesList, isLoading: isMessagesLoading } =
+  // const { data: messagesList, isLoading: isMessagesLoading } =
+  //   useGetMessages(messageReceiver);
+  const { messages: messagesList, isLoading: isMessagesLoading } =
     useGetMessages(messageReceiver);
   const { followConversation } = useFollowConversation();
 
@@ -103,27 +105,43 @@ export default function MessageInput({
         <Box
           position="absolute"
           top="-3.5rem"
-          left={4}
-          right={4}
-          bg="gray.700"
-          borderRadius="md"
-          p={2}
+          left={0}
+          right={8}
+          className="glassmorphism"
+          borderRadius={"1rem"}
+          py={2}
+          px={3}
           display="flex"
           alignItems="center"
           gap={2}
           zIndex={2}
         >
-          <Text flex={1} fontSize="sm" truncate={true} color="gray.200">
-            {replyTo.preview ?? "Message"}
-          </Text>
-          <IconButton
-            size="sm"
-            aria-label="Cancel reply"
-            onClick={onCancelReply}
-            variant="ghost"
+          <Text
+            className="replied-message"
+            borderRadius="sm"
+            w={"100%"}
+            p={1.5}
+            fontSize="sm"
+            truncate={true}
+            color="gray.200"
           >
-            <IoCloseCircleOutline />
-          </IconButton>
+            {replyTo.type.startsWith("audio/")
+              ? "Audio message"
+              : replyTo.preview ?? "Message"}
+          </Text>
+
+          <IoClose
+            cursor={"pointer"}
+            size={"1.5rem"}
+            color="gray"
+            onClick={onCancelReply}
+            onMouseEnter={(target) => {
+              target.currentTarget.style.color = "white";
+            }}
+            onMouseLeave={(target) => {
+              target.currentTarget.style.color = "gray";
+            }}
+          />
         </Box>
       )}
 

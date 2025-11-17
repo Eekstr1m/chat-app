@@ -1,5 +1,5 @@
-import { Box, Flex, Grid, Text } from "@chakra-ui/react";
-import { useEffect, useRef, forwardRef } from "react";
+import { Box, Flex, Text } from "@chakra-ui/react";
+import { useEffect, useRef, forwardRef, useState } from "react";
 import { extractTime } from "../../../utils/extractTime";
 import { useUpdateMessage } from "../../../hooks/useUpdateMessage";
 import { IoCheckmarkOutline, IoCheckmarkDoneOutline } from "react-icons/io5";
@@ -27,7 +27,11 @@ type MessageProps = {
     senderId: string;
     createdAt: Date;
   } | null;
-  onReply?: (payload: { id: string; preview: string | null }) => void;
+  onReply?: (payload: {
+    id: string;
+    preview: string | null;
+    type: string;
+  }) => void;
   onReplyClick?: (repliedToMessageId: string) => void;
 };
 
@@ -104,6 +108,32 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
       closeContextMenu,
     } = useContextMenu();
 
+    // Reference for measuring message content height
+    const messageContentRef = useRef<HTMLDivElement>(null);
+    const [clamp, setClamp] = useState<boolean>(false);
+
+    // Measure the message content height after mount and on resize,
+    // and update `clamp` via effect to avoid setting state during render
+    useEffect(() => {
+      const el = messageContentRef.current;
+      if (!el) return;
+
+      const updateClamp = () => {
+        const shouldClamp = el.clientHeight > 24;
+        setClamp((prev) => (prev === shouldClamp ? prev : shouldClamp));
+      };
+
+      // Initial measurement
+      updateClamp();
+
+      // Observe size changes (handles images, audio visualizer, fonts, etc.)
+      const ro = new ResizeObserver(() => updateClamp());
+      ro.observe(el);
+
+      return () => ro.disconnect();
+      // Re-run if the text/contentType changes
+    }, [text, contentType]);
+
     return (
       <Flex
         onContextMenu={openContextMenu}
@@ -123,27 +153,26 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
         alignSelf={actor === "sender" ? "flex-end" : "flex-start"}
         position={"relative"}
       >
-        <Grid
-          ref={messageRef}
-          id={`msg-${messageId}`}
-          templateColumns={"auto auto"}
-          alignItems={"end"}
-          gap={2}
-        >
+        <Box ref={messageRef} id={`msg-${messageId}`}>
           {/* Replied message preview */}
           {repliedTo && (
             <Box
-              bg={"gray.700"}
-              px={3}
-              py={2}
-              borderRadius="md"
-              maxW="full"
+              className="replied-message"
+              borderRadius="sm"
+              w={"100%"}
+              p={1.5}
               mb={2}
               cursor="pointer"
               onClick={handleJumpToOriginal}
               title="Jump to original message"
             >
-              <Text fontSize="sm" color="gray.300" truncate>
+              <Text
+                fontSize="sm"
+                whiteSpace={"nowrap"}
+                lineClamp={2}
+                color="gray.300"
+                truncate
+              >
                 {repliedTo.contentType?.startsWith("audio/")
                   ? "Audio message"
                   : repliedTo.message ?? "Message"}
@@ -151,40 +180,56 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
             </Box>
           )}
 
-          {contentType === "text" || contentType === undefined ? (
-            <Text>{text}</Text>
-          ) : (
-            <Flex
-              alignItems={"center"}
-              justifyContent={"center"}
-              gap={2}
-              cursor={"pointer"}
-            >
-              <Box p={2} borderRadius={"full"} className="glassmorphismRed">
-                {isPausedRecordedAudio ? (
-                  <IoPlay onClick={togglePauseResume} />
-                ) : (
-                  <IoPauseOutline onClick={togglePauseResume} />
-                )}
-              </Box>
-              <VoiceVisualizer
-                width={"clamp(150px, 30vw, 300px)"}
-                height={"50"}
-                controls={voiceVisualizeControls}
-                isAudioProcessingTextShown={false}
-                isControlPanelShown={false}
-                isProgressIndicatorOnHoverShown={false}
-              />
-            </Flex>
-          )}
-          <Flex gap={1}>
-            <Text color={"gray.500"} lineHeight={"1"}>
-              {extractTime(time)}
-            </Text>
+          <Flex
+            ref={messageContentRef}
+            lineClamp={clamp ? "revert" : undefined}
+            alignItems={"end"}
+            gap={1}
+          >
+            {contentType === "text" || contentType === undefined ? (
+              <Text>{text}</Text>
+            ) : (
+              <Flex
+                alignItems={"center"}
+                justifyContent={"center"}
+                gap={2}
+                cursor={"pointer"}
+              >
+                <Box p={2} borderRadius={"full"} className="glassmorphismRed">
+                  {isPausedRecordedAudio ? (
+                    <IoPlay onClick={togglePauseResume} />
+                  ) : (
+                    <IoPauseOutline onClick={togglePauseResume} />
+                  )}
+                </Box>
+                {/* Voice message visualizer */}
+                <VoiceVisualizer
+                  width={"clamp(150px, 30vw, 300px)"}
+                  height={"50"}
+                  controls={voiceVisualizeControls}
+                  isAudioProcessingTextShown={false}
+                  isControlPanelShown={false}
+                  isProgressIndicatorOnHoverShown={false}
+                />
+              </Flex>
+            )}
 
-            <SendedMessageStatus actor={actor} isRead={isRead} />
+            <Flex
+              maxH={"fit-content"}
+              minW={"fit-content"}
+              gap={1}
+              bottom={0}
+              right={0}
+            >
+              <Text color={"gray.500"} lineHeight={"1"}>
+                {extractTime(time)}
+              </Text>
+
+              <SendedMessageStatus actor={actor} isRead={isRead} />
+            </Flex>
           </Flex>
 
+          {/* Context menu */}
           {menu.visible && (
             <MessageContextMenu
               x={menu.x}
@@ -196,11 +241,12 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                   ? text
                   : null
               }
+              messageType={contentType}
               actor={actor}
               onReply={onReply}
             />
           )}
-        </Grid>
+        </Box>
       </Flex>
     );
   }

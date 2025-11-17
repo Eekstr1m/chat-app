@@ -9,6 +9,7 @@ import { useScrollToUnreadDivider } from "../../../hooks/useScrollToUnreadDivide
 import MessageBlockSkeleton from "../../Skeletons/MessageBlockSkeleton";
 import { Message } from "./Message";
 import { FaChevronDown } from "react-icons/fa";
+import { CustomSpinner } from "../../Spinner/Spinner";
 
 export default function MessagesBlock({
   messageReceiver,
@@ -16,10 +17,16 @@ export default function MessagesBlock({
 }: {
   messageReceiver: string;
   setReplyTo: React.Dispatch<
-    React.SetStateAction<{ id: string; preview: string | null } | null>
+    React.SetStateAction<{
+      id: string;
+      preview: string | null;
+      type: string;
+    } | null>
   >;
 }) {
-  const { data: messages, isLoading } = useGetMessages(messageReceiver);
+  // const { data: messages, isLoading } = useGetMessages(messageReceiver);
+  const { messages, isLoading, hasMore, isFetching, loadMore } =
+    useGetMessages(messageReceiver);
   const { authUser } = useAuthContext();
 
   // Listen for new messages and message status
@@ -31,6 +38,8 @@ export default function MessagesBlock({
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   // Track the id of the last message we handled so we only react to truly new messages
   const lastMessageIdRef = useRef<string | null>(null);
+  // Track if this is the first render
+  const firstRender = useRef(true);
 
   // Refs for all messages to handle reply click
   const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -56,6 +65,40 @@ export default function MessagesBlock({
       observer.observe(targetMessageRef);
     }
   };
+
+  // 🔥 INFINITE SCROLL — OBSERVE TOP ELEMENT
+  const topTriggerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!topTriggerRef.current) return;
+    let isLocked = false;
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetching && !isLocked) {
+          isLocked = true;
+          const container = containerRef.current;
+          const prevScrollHeight = container?.scrollHeight || 0;
+          const prevScrollTop = container?.scrollTop || 0;
+
+          await loadMore();
+
+          observer.unobserve(topTriggerRef.current!);
+
+          requestAnimationFrame(() => {
+            if (container)
+              container.scrollTop =
+                container.scrollHeight - prevScrollHeight + prevScrollTop;
+          });
+
+          // Unlock will happen when user scrolls again
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(topTriggerRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isFetching, loadMore]);
 
   // track whether user is near bottom (actively viewing latest messages)
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -131,14 +174,18 @@ export default function MessagesBlock({
 
     const isOwnMessage = last.senderId === authUser._id;
     if (isOwnMessage || isAtBottom) {
-      lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+      lastMessageRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   }, [messages, isAtBottom, authUser]);
 
   // Scroll to the first unread message
   const { firstUnreadIndex } = useScrollToUnreadDivider({
     messages,
-    firstUnreadMessageRef,
+    // firstUnreadMessageRef,
+    firstRender,
     lastMessageRef,
   });
 
@@ -158,6 +205,14 @@ export default function MessagesBlock({
       overflowY={"auto"}
       pr={4}
     >
+      {hasMore && (
+        <div
+          style={{ margin: "10px auto", padding: "5px 10px" }}
+          ref={topTriggerRef}
+        >
+          <CustomSpinner />
+        </div>
+      )}
       {messages.length > 0 ? (
         <Flex direction={"column"} mt={"auto"}>
           {messages.map((message, index) => (

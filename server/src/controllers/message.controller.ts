@@ -2,6 +2,7 @@ import { Response } from "express";
 import {
   RequestWithParams,
   RequestWithParamsAndBody,
+  RequestWithParamsAndQuery,
 } from "../types/ReqResTypes.js";
 import { GetUserAuthInfoRequestI } from "../middlewares/authVerification.js";
 import Conversation from "../models/conversation.model.js";
@@ -97,7 +98,6 @@ export const sendMessage = async (
         io.to(receiverSocketId).emit("firstMessage", receiver);
       }
     }
-
     // res.status(201).json(newMessage);
     res.status(201).json(populatedMessage ?? newMessage);
   } catch (error) {
@@ -106,12 +106,17 @@ export const sendMessage = async (
   }
 };
 
-type GetMessagesRequestI = RequestWithParams<{ id: string }> &
+type GetMessagesRequestI = RequestWithParamsAndQuery<
+  { id: string },
+  { limit?: string; skip?: string }
+> &
   GetUserAuthInfoRequestI;
 
 export const getMessages = async (req: GetMessagesRequestI, res: Response) => {
   try {
     const { id } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50; // default 50 messages per page
+    const skip = parseInt(req.query.skip as string) || 0; // default skip 0
     if (!req.user) {
       return res.status(400).json({ error: "Something went wrong" });
     }
@@ -122,16 +127,20 @@ export const getMessages = async (req: GetMessagesRequestI, res: Response) => {
     if (receiverId === null)
       return res.status(400).json({ error: "User not found" });
 
-    // Get conversation messages
-    // const conversation = await Conversation.findOne({
-    //   participants: { $all: [senderId, receiverId] },
-    // }).populate("messages");
-
-    // Get conversation messages and populate repliedTo inside messages
-    const conversation = await Conversation.findOne({
+    // Get conversation to count total messages
+    const conversationForCount = await Conversation.findOne({
       participants: { $all: [senderId, receiverId] },
-    }).populate({
+    });
+
+    if (!conversationForCount)
+      return res.status(200).json({ messages: [], total: 0, hasMore: false });
+
+    const total = conversationForCount.messages.length;
+
+    // Get paginated conversation messages and populate repliedTo inside messages
+    const conversation = await conversationForCount.populate({
       path: "messages",
+      options: { sort: { createdAt: "desc" }, limit, skip },
       populate: {
         path: "repliedTo",
         select: "message contentType senderId createdAt",
@@ -139,11 +148,20 @@ export const getMessages = async (req: GetMessagesRequestI, res: Response) => {
     });
 
     // If conversation messages empty return empty array
-    if (!conversation) return res.status(200).json([]);
+    if (!conversation)
+      return res.status(200).json({ messages: [], total: 0, hasMore: false });
 
-    const messages = conversation.messages;
+    // reverse to get chronological order;
+    const messages = conversation.messages.reverse();
+    const hasMore = skip + limit < total;
 
-    res.status(200).json(messages);
+    res.status(200).json({
+      messages,
+      total,
+      hasMore,
+      skip,
+      limit,
+    });
   } catch (error) {
     console.error("Error in get messages controller", error);
     res.status(500).json({ error: "Internal server error" });

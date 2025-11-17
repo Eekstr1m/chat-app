@@ -1,5 +1,9 @@
 import { useSocketContext } from "../context/SocketContext";
-import { MessageI, UnreadCountI } from "../interfaces/MessagesInterfaces";
+import {
+  MessageI,
+  PaginatedMessagesResponse,
+  UnreadCountI,
+} from "../interfaces/MessagesInterfaces";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useAuthContext } from "../context/AuthContext";
@@ -18,14 +22,50 @@ export const useListenMessages = (receiverId: string) => {
         message.senderId === receiverId ||
         message.receiverId === receiverId
       ) {
-        queryClient.setQueryData<MessageI[]>(
+        queryClient.setQueryData<PaginatedMessagesResponse>(
           ["messages", receiverId],
           (oldData) => {
-            if (!oldData) return [message];
-            // Prevent duplicates by checking _id
-            const exists = oldData.some((m) => m._id === message._id);
-            if (exists) return oldData;
-            return [...oldData, message];
+            // no cache -> create minimal paginated payload
+            if (!oldData) {
+              return {
+                messages: [message],
+                total: 1,
+                hasMore: false,
+                skip: 0,
+                limit: 50,
+              } as PaginatedMessagesResponse;
+            }
+
+            // If cache is an array (legacy/broken), append if missing
+            if (Array.isArray(oldData)) {
+              const exists = oldData.some((m) => m._id === message._id);
+              if (exists) {
+                return {
+                  messages: oldData,
+                  total: oldData.length,
+                  hasMore: false,
+                  skip: 0,
+                  limit: 50,
+                } as PaginatedMessagesResponse;
+              }
+              return {
+                messages: [...oldData, message],
+                total: oldData.length + 1,
+                hasMore: false,
+                skip: 0,
+                limit: 50,
+              } as PaginatedMessagesResponse;
+            }
+
+            // Normal paginated payload
+            const pag = oldData as PaginatedMessagesResponse;
+            const exists = pag.messages.some((m) => m._id === message._id);
+            if (exists) return pag;
+            return {
+              ...pag,
+              messages: [...pag.messages, message],
+              total: pag.total + 1,
+            } as PaginatedMessagesResponse;
           }
         );
       }
@@ -49,10 +89,26 @@ export const useListenMessages = (receiverId: string) => {
     };
 
     const handleMessageDeleted = ({ messageId }: { messageId: string }) => {
-      queryClient.setQueryData<MessageI[]>(
+      queryClient.setQueryData<PaginatedMessagesResponse | MessageI[]>(
         ["messages", receiverId],
-        (oldMessages) =>
-          oldMessages?.filter((msg) => msg._id !== messageId) ?? []
+        (oldData) => {
+          if (!oldData) return oldData ?? [];
+
+          if (Array.isArray(oldData)) {
+            return oldData.filter((msg) => msg._id !== messageId);
+          }
+
+          const pag = oldData as PaginatedMessagesResponse;
+          const filtered = pag.messages.filter((msg) => msg._id !== messageId);
+          return {
+            ...pag,
+            messages: filtered,
+            total: Math.max(
+              0,
+              pag.total - (pag.messages.length - filtered.length)
+            ),
+          } as PaginatedMessagesResponse;
+        }
       );
     };
 
