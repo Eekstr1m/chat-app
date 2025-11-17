@@ -24,7 +24,6 @@ export default function MessagesBlock({
     } | null>
   >;
 }) {
-  // const { data: messages, isLoading } = useGetMessages(messageReceiver);
   const { messages, isLoading, hasMore, isFetching, loadMore } =
     useGetMessages(messageReceiver);
   const { authUser } = useAuthContext();
@@ -66,7 +65,7 @@ export default function MessagesBlock({
     }
   };
 
-  // 🔥 INFINITE SCROLL — OBSERVE TOP ELEMENT
+  // Infinite scroll: load more when scrolling to top
   const topTriggerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -100,7 +99,7 @@ export default function MessagesBlock({
     return () => observer.disconnect();
   }, [hasMore, isFetching, loadMore]);
 
-  // track whether user is near bottom (actively viewing latest messages)
+  // Track whether user is near bottom (actively viewing latest messages)
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -184,7 +183,6 @@ export default function MessagesBlock({
   // Scroll to the first unread message
   const { firstUnreadIndex } = useScrollToUnreadDivider({
     messages,
-    // firstUnreadMessageRef,
     firstRender,
     lastMessageRef,
   });

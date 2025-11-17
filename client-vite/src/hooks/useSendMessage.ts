@@ -28,7 +28,6 @@ export const useSendMessage = (receiverId: string) => {
       return response.data;
     },
     onSuccess: (newMessage) => {
-      console.log("🚀 ~ useSendMessage ~ newMessage:", newMessage);
       // Update messages cache.
       // The `messages` query stores a paginated response { messages, total, hasMore, skip, limit }.
       // Older bug may have left an array in the cache, so handle both shapes.

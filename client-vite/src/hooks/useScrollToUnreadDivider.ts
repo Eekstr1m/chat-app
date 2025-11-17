@@ -4,7 +4,6 @@ import { useAuthContext } from "../context/AuthContext";
 
 interface UseMessageScrollProps {
   messages: MessageI[] | undefined;
-  // firstUnreadMessageRef: RefObject<HTMLDivElement | null>;
   firstRender: RefObject<boolean>;
   lastMessageRef: RefObject<HTMLDivElement | null>;
 }
@@ -25,24 +24,7 @@ export const useScrollToUnreadDivider = ({
     );
   }, [messages, authUser]);
 
-  // Scroll to the first unread message
-  // useEffect(() => {
-  //   if (!messages?.length) return;
-
-  //   const scrollTimeout = setTimeout(() => {
-  //     if (firstUnreadIndex !== -1 && firstUnreadMessageRef.current) {
-  //       firstUnreadMessageRef.current.scrollIntoView({
-  //         behavior: "smooth",
-  //         block: "end",
-  //       });
-  //     }
-  //   }, 100);
-
-  //   // Clear the timeout when the component unmounts
-  //   return () => clearTimeout(scrollTimeout);
-  // }, [messages, firstUnreadMessageRef, lastMessageRef, firstUnreadIndex]);
-
-  // --- 3. Auto-scroll when user opens chat OR to first unread message ---
+  // Auto-scroll when user opens chat OR to first unread message
   useEffect(() => {
     if (!messages?.length) return;
 

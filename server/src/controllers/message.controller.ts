@@ -72,7 +72,7 @@ export const sendMessage = async (
 
     await Promise.all([conversation.save(), newMessage.save()]);
 
-    // populate repliedTo for emission/response
+    // Populate repliedTo for emission/response
     const populatedMessage = await Message.findById(newMessage._id).populate({
       path: "repliedTo",
       select: "message contentType senderId createdAt",
@@ -98,7 +98,6 @@ export const sendMessage = async (
         io.to(receiverSocketId).emit("firstMessage", receiver);
       }
     }
-    // res.status(201).json(newMessage);
     res.status(201).json(populatedMessage ?? newMessage);
   } catch (error) {
     console.error("Error send message controller", error);

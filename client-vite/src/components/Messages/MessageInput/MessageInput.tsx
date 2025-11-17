@@ -37,8 +37,6 @@ export default function MessageInput({
   } = useForm<{ message: string }>();
 
   // Get messages
-  // const { data: messagesList, isLoading: isMessagesLoading } =
-  //   useGetMessages(messageReceiver);
   const { messages: messagesList, isLoading: isMessagesLoading } =
     useGetMessages(messageReceiver);
   const { followConversation } = useFollowConversation();
